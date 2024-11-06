@@ -37,6 +37,20 @@ jobs:
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
+        
+      # Prowler 설치 및 검사 실행
+      - name: Install and Run Prowler
+        run: |
+          git clone https://github.com/prowler-cloud/prowler.git
+          cd prowler
+          ./prowler -M html > prowler-report.html  # HTML 보고서 생성
+
+      # Prowler 보고서 업로드
+      - name: Upload Prowler Report as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: prowler-report
+          path: prowler/prowler-report.html
 
       # Terraform destroy 실행 (배포 성공 여부와 상관없이 항상 실행)
       - name: Cleanup on Failure
