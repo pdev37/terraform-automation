@@ -274,22 +274,3 @@ resource "aws_vpc_endpoint" "myproject_prod_ec2messages_endpoint" {
   }
 }
 
-# Prowler Automation
-resource "null_resource" "run_prowler" {
-  depends_on = [aws_vpc_endpoint.myproject_prod_ssm_endpoint, aws_vpc_endpoint.myproject_prod_ssmmessages_endpoint, aws_vpc_endpoint.myproject_prod_ec2messages_endpoint]
-
-  provisioner "local-exec" {
-    command = <<-EOT
-      # Delete existing file
-      rm -f prowler-report.json prowler-error.log
-        
-      # Refresh SSO login session and verify authentication session
-      aws sso login --profile AdministratorAccess-756209548001 || true
-      sleep 5
-        
-      # Run Prowler
-      prowler aws --profile AdministratorAccess-756209548001 > prowler-report.txt 2> prowler-error.log
-    EOT
-  }
-}
-
