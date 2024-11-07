@@ -22,13 +22,26 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ap-northeast-2
 
+      - name: Download Terraform Outputs
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-outputs
+          path: .
+
       - name: Install and Run Prowler on Specific Resources
         run: |
-            sudo apt update
-            sudo apt install -y pipx
-            pipx install prowler
+          sudo apt update
+          sudo apt install -y pipx
+          pipx install prowler
+          
+          # tf_outputs.json 파일 존재 여부 확인
+          if [ -f tf_outputs.json ]; then
             RESOURCE_ARN=$(jq -r '.resource_name.value' tf_outputs.json)
             prowler aws --resource-arn $RESOURCE_ARN -M csv > prowler-report.csv || true
+          else
+            echo "tf_outputs.json not found. Skipping Prowler scan."
+            exit 0
+          fi
   
       - name: Upload Prowler Report
         if: always()
