@@ -17,9 +17,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
           aws-region: ap-northeast-2
 
       - name: Download Terraform Outputs
@@ -33,6 +31,7 @@ jobs:
           sudo apt update
           sudo apt install -y pipx
           pipx install prowler
+          prowler -v
           
           # tf_outputs.json 파일 존재 여부 확인
           if [ -f tf_outputs.json ]; then
