@@ -34,10 +34,17 @@ jobs:
         run: terraform init
 
       - name: Terraform Plan
-        run: terraform plan
+        id: plan
+        run: |
+          terraform plan -out=tfplan > plan_output.txt
+          if grep -q "No changes. Infrastructure is up-to-date." plan_output.txt; then
+            echo "No changes detected. Skipping deployment."
+            exit 0
+          fi
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        if: steps.plan.outcome == 'success'
+        run: terraform apply -auto-approve tfplan
 
       # Terraform destroy 실행 (배포 성공 여부와 상관없이 항상 실행)
       - name: Cleanup on Failure
