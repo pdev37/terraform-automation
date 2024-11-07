@@ -30,18 +30,20 @@ jobs:
           sudo apt install -y pipx
           pipx install prowler
           prowler -v
-          prowler aws -M csv > prowler-report.csv || true
+          
+          # 현재 날짜와 시간을 파일 이름에 추가
+          TIMESTAMP=$(date '+%Y-%m-%d_%H-%M-%S')
+          prowler aws -M json-asff > "prowler-report-$TIMESTAMP.json" || true
   
       - name: Upload Prowler Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: prowler-report
-          path: prowler-report.csv
+          path: "prowler-report-*.json"
+
+      - name: Upload JSON Report to S3
+        run: |
+          TIMESTAMP=$(date '+%Y-%m-%d_%H-%M-%S')
+          aws s3 cp "prowler-report-$TIMESTAMP.json" s3://terraform-state-bucket-cs-0001/deploy-report/prowler-report-$TIMESTAMP.json
   
-      - name: Upload Prowler Error Log
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: prowler-error-log
-          path: prowler-error.log
