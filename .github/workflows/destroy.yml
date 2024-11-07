@@ -22,12 +22,6 @@ jobs:
         with:
           terraform_version: 1.9.8
 
-      # AWS 자격 증명 구성
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
-          aws-region: ap-northeast-2
 
       # Terraform Init
       - name: Terraform Init
