@@ -51,12 +51,9 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Install and Run Prowler
+      - name: Run Prowler using Docker
         run: |
-          git clone https://github.com/prowler-cloud/prowler.git
-          cd prowler
-          chmod +x prowler  # 실행 권한 부여
-          bash prowler -M html > prowler-report.html  # Prowler 실행
+          docker run -it --rm prowler-cloud/prowler -M html > prowler-report.html
 
       - name: Upload Prowler Report
         uses: actions/upload-artifact@v4
@@ -64,8 +61,4 @@ jobs:
           name: prowler-report
           path: prowler/prowler-report.html
           
-      # Terraform destroy 실행 (배포 성공 여부와 상관없이 항상 실행)
-      - name: Cleanup on Failure
-        if: failure()
-        run: terraform destroy -auto-approve
           
