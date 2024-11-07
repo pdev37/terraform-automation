@@ -49,18 +49,23 @@ jobs:
     needs: deploy  # deploy 작업이 완료된 후에만 실행
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install and Run Prowler
         run: |
           git clone https://github.com/prowler-cloud/prowler.git
           cd prowler
           chmod +x prowler  # 실행 권한 부여
-          ./prowler -M html > prowler-report.html  # Prowler 검사 실행
+          bash prowler -M html > prowler-report.html  # Prowler 실행
 
       - name: Upload Prowler Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: prowler-report
           path: prowler/prowler-report.html
+          
+      # Terraform destroy 실행 (배포 성공 여부와 상관없이 항상 실행)
+      - name: Cleanup on Failure
+        if: failure()
+        run: terraform destroy -auto-approve
           
