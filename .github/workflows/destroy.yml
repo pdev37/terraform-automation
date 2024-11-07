@@ -8,6 +8,10 @@ on:
     types:
       - completed  # 완료 시(성공 또는 실패)
   workflow_dispatch:
+
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
       
 jobs:
   destroy:
@@ -22,6 +26,12 @@ jobs:
         with:
           terraform_version: 1.9.8
 
+      # AWS 자격 증명 구성
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+          aws-region: ap-northeast-2
 
       # Terraform Init
       - name: Terraform Init
@@ -30,3 +40,9 @@ jobs:
       # Terraform Destroy
       - name: Terraform Destroy
         run: terraform destroy -auto-approve
+      
+      # 로컬 출력 파일 삭제
+      - name: Cleanup Terraform Outputs
+        run: |
+          rm -f tf_outputs.json
+          echo "tf_outputs.json has been deleted."

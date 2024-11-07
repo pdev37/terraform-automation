@@ -6,6 +6,10 @@ on:
     types:
       - completed
 
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+
 jobs:
   prowler-scan:
     runs-on: ubuntu-latest
@@ -14,13 +18,18 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+          aws-region: ap-northeast-2
 
       - name: Download Terraform Outputs
         uses: actions/download-artifact@v4
         with:
           name: terraform-outputs
-          path: .
+      - name: terraform-outputs-json
+        run: ls -R tf_outputs.json
 
       - name: Install and Run Prowler on Specific Resources
         run: |
