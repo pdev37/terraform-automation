@@ -1,0 +1,44 @@
+name: Run Prowler Scan
+
+on:
+  workflow_run:
+    workflows: ["terraform"]
+    types:
+      - completed
+
+jobs:
+  prowler-scan:
+    runs-on: ubuntu-latest
+    name: Run Prowler Scan
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}  # 필요 시
+        run: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+          aws configure set aws_session_token $AWS_SESSION_TOKEN
+          aws configure set region ap-northeast-2
+
+      - name: Install Git
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git
+
+      - name: Install and Run Prowler
+        run: |
+          git clone https://github.com/prowler-cloud/prowler.git
+          cd prowler
+          chmod +x prowler  # 실행 권한 부여
+          ./prowler -M html > prowler-report.html  # Prowler 실행
+
+      - name: Upload Prowler Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: prowler-report
+          path: prowler/prowler-report.html
