@@ -30,9 +30,10 @@ jobs:
           sudo apt install -y pipx
           pipx install prowler
           prowler -v
-          
+
           # 현재 날짜와 시간을 파일 이름에 추가
           TIMESTAMP=$(date '+%Y-%m-%d_%H-%M-%S')
+          echo "TIMESTAMP=$(date '+%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
           prowler aws -M json-asff > "prowler-report-$TIMESTAMP.json" || true
   
       - name: Upload Prowler Report
@@ -44,6 +45,5 @@ jobs:
 
       - name: Upload JSON Report to S3
         run: |
-          TIMESTAMP=$(date '+%Y-%m-%d_%H-%M-%S')
-          aws s3 cp "prowler-report-$TIMESTAMP.json" s3://terraform-state-bucket-cs-0001/deploy-report/prowler-report-$TIMESTAMP.json
+          aws s3 cp "prowler-report-${{ env.TIMESTAMP }}.json" s3://terraform-state-bucket-cs-0001/deploy-report/prowler-report-${{ env.TIMESTAMP }}.json
   
