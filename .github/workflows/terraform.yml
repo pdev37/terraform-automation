@@ -44,19 +44,6 @@ jobs:
         if: steps.plan.outcome == 'success'
         run: terraform apply -auto-approve tfplan
 
-      # Terraform 배포 후 출력값 추출
-      - name: Extract Terraform Outputs
-        id: tf_outputs
-        run: terraform output -json > tf_outputs.json
-
-      # 아티팩트로 Terraform 출력값 업로드 (스캔 단계에서 사용하기 위해)
-      - name: Upload Terraform Outputs
-        uses: actions/upload-artifact@v4
-        with:
-          name: terraform-outputs
-          path: tf_outputs.json
-          retention-days: 7
-
       # Terraform destroy 실행 (배포 성공 여부와 상관없이 항상 실행)
       - name: Cleanup on Failure
         if: failure()

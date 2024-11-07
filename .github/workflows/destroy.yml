@@ -2,11 +2,11 @@ name: Terraform Destroy
 
 on:
   workflow_run:
-    workflows:  # 실패 시 이 워크플로우를 트리거할 워크플로우 이름을 명시
-      - Terraform Deployment  # 배포 워크플로우 이름을 작성
-      - Run Prowler Scan  # 다른 워크플로우 이름도 추가 가능
+    workflows:
+      - Terraform Deployment
+      - Run Prowler Scan
     types:
-      - completed  # 완료 시(성공 또는 실패)
+      - completed
   workflow_dispatch:
 
 permissions:
@@ -40,9 +40,3 @@ jobs:
       # Terraform Destroy
       - name: Terraform Destroy
         run: terraform destroy -auto-approve
-      
-      # 로컬 출력 파일 삭제
-      - name: Cleanup Terraform Outputs
-        run: |
-          rm -f tf_outputs.json
-          echo "tf_outputs.json has been deleted."
