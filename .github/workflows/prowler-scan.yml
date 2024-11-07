@@ -2,7 +2,7 @@ name: Run Prowler Scan
 
 on:
   workflow_run:
-    workflows: ["terraform"]
+    workflows: ["Terraform Deployment"]
     types:
       - completed
 
