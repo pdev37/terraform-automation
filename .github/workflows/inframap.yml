@@ -12,32 +12,37 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Install Inframap
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.20'
+      - run: go version
+
+      - name: Clone Inframap Repository
+        run: git clone https://github.com/cycloidio/inframap
+
+      - name: Build Inframap
         run: |
-          wget https://github.com/cycloidio/inframap/releases/download/v0.7.0/inframap_0.7.0_linux_amd64.tar.gz
-          tar -xvzf inframap_0.7.0_linux_amd64.tar.gz
-          sudo mv inframap /usr/local/bin/
-          
-          - name: Setup Terraform
-          uses: hashicorp/setup-terraform@v3
-          with:
-            terraform_version: 1.9.8
+          cd inframap
+          go mod download
+          make build
+          sudo mv bin/inframap /usr/local/bin/
+
+      - name: Verify Inframap Installation
+        run: inframap version
   
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
           aws-region: ap-northeast-2
-            
-      - name: Terraform Init
-        run: terraform init
 
-      - name: Generate Terraform Plan
-        run: terraform plan -out=tfplan.binary
-
-      - name: Generate Inframap from Terraform Plan
+      - name: Download TFState from S3
         run: |
-          terraform show -json tfplan.binary | inframap generate --tfstate > inframap-output.dot
+          aws s3 cp s3://terraform-state-bucket-cs-0001/s3-backend/terraform.tfstate ./terraform.tfstate
+
+      - name: Generate Inframap from tfstate
+        run: |
+          inframap generate --tfstate=terraform.tfstate > inframap-output.dot
           dot -Tpng inframap-output.dot -o inframap-diagram.png
 
       - name: Upload Inframap Diagram
