@@ -38,8 +38,6 @@ jobs:
           # 브랜치 푸시
           git push origin $BRANCH_NAME --force
           
-      - name: Wait for Branch Sync
-        run: sleep 5
 
       # PR 생성
       - name: Create Pull Request
@@ -51,4 +49,18 @@ jobs:
           body: "This PR was automatically created for Infracost analysis."
           base: main
           branch: $BRANCH_NAME
+          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
+          signoff: false
+          delete-branch: true
+          labels: |
+            report
+            automated pr
+          assignees: peter-evans
+          reviewers: peter-evans
+          team-reviewers: |
+            developers
+            qa-team
+          milestone: 1
+          draft: false
           
