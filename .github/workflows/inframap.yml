@@ -1,0 +1,29 @@
+name: Generate Inframap
+
+on:
+  #push:
+    #branches:
+      #- main
+  workflow_dispatch:
+
+jobs:
+  inframap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Inframap
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/cycloidio/inframap/master/scripts/install.sh | sh
+
+      - name: Generate Inframap from Terraform Plan
+        run: |
+          terraform show -json tfplan.binary | inframap generate --tfstate > inframap-output.dot
+          dot -Tpng inframap-output.dot -o inframap-diagram.png
+
+      - name: Upload Inframap Diagram
+        uses: actions/upload-artifact@v4
+        with:
+          name: inframap-diagram
+          path: inframap-diagram.png

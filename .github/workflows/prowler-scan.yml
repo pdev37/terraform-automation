@@ -2,9 +2,10 @@ name: Run Prowler Scan
 
 on:
   workflow_run:
-    workflows: ["Terraform Deployment"]
-    types:
-      - completed
+    #workflows: ["Terraform Deployment"]
+    #types:
+      #- completed
+  workflow_dispatch:
 
 permissions:
   id-token: write   # This is required for requesting the JWT
