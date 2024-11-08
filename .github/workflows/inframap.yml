@@ -25,7 +25,6 @@ jobs:
           cd inframap
           go mod download
           make build
-          sudo mv bin/inframap /usr/local/bin/
 
       - name: Verify Inframap Installation
         run: inframap version
