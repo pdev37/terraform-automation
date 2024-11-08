@@ -1,0 +1,37 @@
+name: Create infracost Branch
+
+on:
+  push:
+    branches:
+      - main  # main 브랜치에 푸시될 때 워크플로 실행
+
+jobs:
+  create-analysis-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      # main 브랜치 코드 체크아웃
+      - name: Checkout Main Branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      # Git 설정 및 분석용 브랜치 생성
+      - name: Create and Push Analysis Branch
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          BRANCH_NAME="infracost-report-$(date +%Y%m%d%H%M%S)"
+          git checkout -b $BRANCH_NAME
+          git push origin $BRANCH_NAME --force  # 분석 브랜치를 리포지토리에 푸시
+
+      # PR 생성
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ github.token }}
+          commit-message: "Auto-generated analysis branch"
+          title: "Infracost Analysis PR"
+          body: "This PR was automatically created for Infracost analysis."
+          base: main
+          branch: $BRANCH_NAME

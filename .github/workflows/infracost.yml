@@ -1,6 +1,11 @@
 name: Infracost Workflow
 
 on:
+  workflow_run:  
+    workflows:
+      - Create infracost Branch
+    types:
+      - completed
   pull_request:
     types: [opened, synchronize, closed]
   push:
@@ -8,24 +13,40 @@ on:
       - main
 
 jobs:
-  infracost-default-branch-update:
-
-    name: Infracost Default Branch Update
-    if: github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'master')
+  infracost-pull-request-checks:
+    name: Infracost Pull Request Checks
+    if: github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'synchronize')
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # Required to post comments
+    
     steps:
       - name: Setup Infracost
         uses: infracost/actions/setup@v3
         with:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
 
-      - name: Checkout main/master branch
+      # Checkout the base branch of the pull request (e.g. main/master).
+      - name: Checkout base branch
         uses: actions/checkout@v4
+        with:
+          ref: '${{ github.event.pull_request.base.ref }}'
 
-      - name: Run Infracost on default branch and update Infracost Cloud
+      # Generate Infracost JSON file as the baseline.
+      - name: Generate Infracost cost estimate baseline and update Infracost Cloud
         run: |
           infracost breakdown --path=. \
-                    --format=json \
-                    --out-file=infracost.json
+                              --format=json \
+                              --out-file=/tmp/infracost-base.json
 
           infracost upload --path=infracost.json || echo "Always pass main branch runs even if there are policy failures"
+
+
+      - name: Post Infracost comment
+        run: |
+            infracost comment github --path=/tmp/infracost.json \
+                                     --repo=$GITHUB_REPOSITORY \
+                                     --github-token=${{ github.token }} \
+                                     --pull-request=${{ github.event.pull_request.number }} \
+                                     --behavior=update
