@@ -2,28 +2,29 @@ name: Infracost Workflow
 
 on:
   pull_request:
+    types: [opened, synchronize]
+  push:
     branches:
       - main
 
 jobs:
-  infracost-pull-request-checks:
-    name: Infracost Pull Request Checks
-    if: github.event_name == 'push' && github.ref_name == 'main'
+  infracost:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write # Required to post comments
-
+      pull-requests: write  # PR에 주석을 추가하기 위해 필요함.
+      
     steps:
       # Infracost CLI 설치
       - name: Setup Infracost
         uses: infracost/actions/setup@v3
         with:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
-
-      - name: Checkout base branch
-        uses: actions/checkout@v4
       
+      # 코드 체크아웃
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       # 비용 분석 수행
       - name: Run Infracost
         run: |
@@ -33,7 +34,7 @@ jobs:
 
       # PR에 비용 분석 결과 주석 추가
       - name: Post Infracost Comment
-        if: github.event.pull_request != null
+        if: github.event_name == 'pull_request'
         run: |
           infracost comment github --path=infracost-report.json \
                                    --repo=$GITHUB_REPOSITORY \
