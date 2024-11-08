@@ -8,29 +8,44 @@ on:
       - main
 
 jobs:
-  infracost:
+  infracost-pull-request-checks:
+    name: Infracost Pull Request Checks
+    if: github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'synchronize')
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write  # PR에 주석을 추가하기 위해 필요함.
-      
+      pull-requests: write # Required to post comments
+
     steps:
       # Infracost CLI 설치
       - name: Setup Infracost
         uses: infracost/actions/setup@v3
         with:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
-      
-      # 코드 체크아웃
-      - name: Checkout Code
-        uses: actions/checkout@v4
 
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: '${{ github.event.pull_request.base.ref }}'
+      
+      
       # 비용 분석 수행
       - name: Run Infracost
         run: |
           infracost breakdown --path=. \
                               --format=json \
                               --out-file=infracost-report.json
+
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+
+        # Generate an Infracost diff and save it to a JSON file.
+      - name: Generate Infracost diff
+        run: |
+          infracost diff --path=. \
+                         --format=json \
+                         --compare-to=/tmp/infracost-base.json \
+                         --out-file=/tmp/infracost.json
 
       # PR에 비용 분석 결과 주석 추가
       - name: Post Infracost Comment
