@@ -10,7 +10,7 @@ on:
 jobs:
   infracost-pull-request-checks:
     name: Infracost Pull Request Checks
-    if: github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'synchronize')
+    if: github.event_name == 'infracost-report' && (github.event.action == 'opened' || github.event.action == 'synchronize')
     runs-on: ubuntu-latest
     permissions:
       contents: read
