@@ -23,6 +23,9 @@ jobs:
         run: |
           curl -fsSL https://raw.githubusercontent.com/cycloidio/inframap/master/scripts/install.sh | sh
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+          
+      - name: Initialize Terraform
+        run: terraform init
 
       - name: Generate Terraform Plan
         run: terraform plan -out=tfplan.binary
