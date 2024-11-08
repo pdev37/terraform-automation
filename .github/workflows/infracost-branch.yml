@@ -24,19 +24,27 @@ jobs:
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
-          BRANCH_NAME="infracost-report"
-
+          BRANCH_NAME="infracost-report-$(date +%Y%m%d%H%M%S)"
+          
           # 원격에 같은 이름의 브랜치가 있는지 확인
           if git ls-remote --heads origin $BRANCH_NAME; then
             echo "Branch $BRANCH_NAME already exists. Skipping creation."
             exit 0
           else
+            # 브랜치 생성 및 체크아웃
             git checkout -b $BRANCH_NAME
-            git push origin $BRANCH_NAME --force  # 분석 브랜치를 리포지토리에 푸시
-          fi
 
-      - name: Wait for Branch Sync
-        run: sleep 5  
+            # 파일 추가 또는 수정 (예: README 파일에 주석 추가)
+            echo "This is an auto-generated commit for analysis." >> README.md
+            
+            # 변경 사항 커밋
+            git add README.md
+            git commit -m "Auto-generated commit for analysis"
+
+            # 브랜치 푸시
+            git push origin $BRANCH_NAME --force
+          fi
+  
 
       # PR 생성
       - name: Create Pull Request
@@ -47,5 +55,5 @@ jobs:
           title: "Infracost Analysis PR"
           body: "This PR was automatically created for Infracost analysis."
           base: main
-          branch: infracost-report
+          branch: $BRANCH_NAME
           
