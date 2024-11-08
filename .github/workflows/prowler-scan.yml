@@ -1,10 +1,10 @@
 name: Run Prowler Scan
 
 on:
-  #workflow_run:
-    #workflows: ["Terraform Deployment"]
-    #types:
-      #- completed
+  workflow_run:
+    workflows: ["Terraform Deployment"]
+    types:
+     - completed
   workflow_dispatch:
 
 permissions:
@@ -48,3 +48,4 @@ jobs:
         run: |
           aws s3 cp "prowler-report-${{ env.TIMESTAMP }}.json" s3://prowler-reprort-cs-0001/deploy-report/prowler-report-${{ env.TIMESTAMP }}.json
   
+          
