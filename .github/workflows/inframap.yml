@@ -43,7 +43,7 @@ jobs:
 
       - name: Generate Inframap from tfstate
         run: |
-          inframap generate --tfstate=terraform.tfstate > inframap-output.dot
+          inframap generate terraform.tfstate > inframap-output.dot
           dot -Tpng inframap-output.dot -o inframap-diagram.png
 
       - name: Upload Inframap Diagram
