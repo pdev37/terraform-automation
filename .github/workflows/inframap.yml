@@ -29,6 +29,8 @@ jobs:
           cd inframap
           go mod download
           make build
+          sudo mv bin/inframap /usr/local/bin/  # 실행 파일 이동
+          echo "/usr/local/bin" >> $GITHUB_PATH  # 시스템 경로에 추가
   
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
