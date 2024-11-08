@@ -28,10 +28,9 @@ jobs:
         run: |
           cd inframap
           go mod download
-          make build
-          sudo mv bin/inframap /usr/local/bin/  # 실행 파일 이동
-          echo "/usr/local/bin" >> $GITHUB_PATH  # 시스템 경로에 추가
-  
+          go build -o inframap -ldflags "-X github.com/cycloidio/inframap/cmd.Version=v0.7.0"
+          sudo mv inframap /usr/local/bin/
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
